@@ -14,14 +14,14 @@
             <img src="../images/fm.png" class="nav-top" />
             <p>私人FM</p>
         </router-link>
-        <router-link :to="'/hot?theme'" class="nav-item">
-            <div class="nav-top nav-text">16</div>
+        <router-link :to="'dailySongs?date='+ date" class="nav-item">
+            <div class="nav-top nav-text" v-html="date"></div>
             <p>每日歌曲推荐</p>
         </router-link>
-        <router-link :to="'/play?id='+ playSongId + '&back=1'" class="nav-item">
+        <a href="javascript:;" class="nav-item" @click="setIsShowPlay1({flag: true, id:playSongId})">
             <img src="../images/hot.gif" class="nav-top" />
             <p>正在播放</p>
-        </router-link>
+        </a>
     </nav>
 
     <div class="recommend-box" v-if="!isLoading">
@@ -45,12 +45,13 @@
             <a href="javascript:;" class="more-btn">更多></a>
         </h2>
         <div class="song-list clearfix">
-            <a href="javascript:;" class="song-items song-items1" v-for="(item, index) in mvList">
+            <router-link :to="'mvPlay?id=' + item.id" class="song-items song-items1" v-for="(item, index) in mvList" key={{index}}>
                 <div class="img-box">
                     <img :data-src="item.picUrl" alt="" />
                 </div>
                 <p class="songs-der com-two-overflow">{{item.name}}</p>
-            </a>
+                <p v-html="item.artistName" class="art-name"></p>
+            </router-link>
         </div>
     </div>
 
@@ -73,7 +74,8 @@ export default {
             isLoading : true,
             bannerList : [],
             songList : [],
-            mvList : []
+            mvList : [],
+            date : null,
         }
     },
 
@@ -91,19 +93,27 @@ export default {
     },
 
     methods : {
+        ...mapActions([
+            'setIsShowPlay1'
+        ]),
 
-        async getData() {
+        getData() {
             // await后面要返回一个promise对象
-            await this.getBanner();
-            await this.getSongList();
-            await this.getMvList();
-            // await Promise.all( [this.getBanner(), this.getSongList()]).then( () => {
 
-            // });
-            this.isLoading = false;
-            this.$nextTick(() => {
-                new lazyImg();
+            // 方法1
+            /*await this.getBanner();
+            await this.getSongList();
+            await this.getMvList();*/
+
+            // 方法二
+            Promise.all( [this.getBanner(), this.getSongList(), this.getMvList()]).then( () => {
+                this.isLoading = false;
+                this.date = (new Date(this.date)).getDate();
+                this.$nextTick(() => {
+                    new lazyImg();
+                });
             });
+
         },
 
         getBanner() {
@@ -111,6 +121,7 @@ export default {
                 this.axios.get(this.API.banner).then( ( data ) => {
                     resolve();
                     let data1 = data.data;
+                    this.date = data.headers.date;
                     this.bannerList = data1.banners;
                 });
             });
@@ -121,7 +132,6 @@ export default {
                 this.axios.get(this.API.personalized).then( ( data ) => {
                     resolve();
                     this.songList = data.data.result;
-                    console.log(this.songList);
                 });
             });
         },
@@ -210,7 +220,6 @@ export default {
     float: left;
     margin: 0 0 .5rem 1%;
     width: 32%;
-    height: 11rem;
     color: #333;
     overflow: hidden;
 }
@@ -228,6 +237,10 @@ export default {
     margin-top: .2rem;
     height: 2.5rem;
     padding: 0 .3rem;
+}
+.recommend-box .art-name {
+    color: #808080;
+    font-size: .8rem;
 }
 
 </style>

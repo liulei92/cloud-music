@@ -24,7 +24,7 @@
 
             </div>
             <div class="search-list">
-                <router-link :to="'play?id=' + data.id " class="search-item" v-for="data in songList" key={{index}}>
+                <div @click="setIsShowPlay1( {flag : true, playSongId : data.id} )" class="search-item" v-for="data in songList" key={{index}}>
                     <div>
                         <p class="name" v-html="data.name"></p>
                         <p class="details">
@@ -33,8 +33,8 @@
                             <span v-html="data.al.name"></span>
                         </p>
                     </div>
-                    <div class="play-mark"></div>
-                </router-link>
+                    <a href="javascript:;" class="play-mark" v-if="data.mv" @click="mvPlay($event, data.mv)"></a>
+                </div>
             </div>
         </div>
     </div>
@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
 import loading from '@/components/loading';
 import navHeader from '@/components/nav';
 
@@ -66,14 +67,23 @@ export default {
     },
 
     methods : {
+        ...mapActions([
+            'setIsShowPlay1'
+        ]),
+
         getSongList() {
             this.axios.get( this.API.playlistdetail + '?id=' + this.$route.query.id ).then( ( data ) => {
-                console.log(data.data.playlist);
+                console.log(data.data.playlist.tracks);
                 this.songList = data.data.playlist.tracks;
                 this.songDetails = data.data.playlist;
                 this.isLoading = false;
             });
+        },
+        mvPlay(e, id) {
+            e.stopPropagation();
+            this.$router.push({path:'mvPlay?id='+ id});
         }
+
     }
 }
 </script>

@@ -7,19 +7,33 @@
         <nav class="nav-box" v-if="activeIndex<=4">
             <router-link to="/recommend" class="nav-item" :class="{active : activeIndex===0}">个性推荐</router-link>
             <router-link :to="'/songList?cat=' + chooseClass" class="nav-item" :class="{active : activeIndex===1}">歌单</router-link>
-            <router-link to="/" class="nav-item" :class="{active : activeIndex===2}">主播电台</router-link>
-            <router-link to="/" class="nav-item" :class="{active : activeIndex===3}">排行榜</router-link>
+            <router-link to="/radio" class="nav-item" :class="{active : activeIndex===2}">主播电台</router-link>
+            <router-link to="/rank" class="nav-item" :class="{active : activeIndex===3}">排行榜</router-link>
         </nav>
 
         <transition name="fade">
             <router-view></router-view>
         </transition>
 
+        <!-- 公共提示组件 -->
+        <toast></toast>
+
+        <!-- 搜索组件 -->
         <transition name="show-search">
             <search v-show="searching" v-on:setSearch="setSearch"></search>
         </transition>
 
-        <audio :src='playSong.url' controls="controls" preload id="music" hidden></audio>
+        <!-- 登录组件 -->
+        <transition name="show-login">
+            <login v-show="isShowLogin"></login>
+        </transition>
+
+        <!-- <audio :src='playSong.url' controls="controls" preload id="music" hidden></audio> -->
+
+        <!-- 播放音乐 -->
+        <transition name="show-login">
+            <play></play>
+        </transition>
 
     </div>
 </template>
@@ -27,16 +41,22 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import search from '@/pages/search';
+import toast from '@/components/toast';
+import login from '@/pages/login';
+import play from '@/pages/play';
+
 export default {
     name: 'app',
     data() {
         return {
             activeIndex: 999,
-            searching : false,
+            searching : false
         }
     },
     computed : {
         ...mapState([
+            'isShowPlay',
+            'isShowLogin',
             'isPlay',
             'historyList',
             'playSongId',
@@ -47,6 +67,7 @@ export default {
     },
 
     watch: {
+        // 监听当前路由变化
         '$route' (to, from) {
             setTimeout(function() {
                 document.body.scrollTop = document.documentElement.scrollTop =  0;
@@ -58,6 +79,12 @@ export default {
                     break;
                 case 'songList':
                     this.activeIndex = 1;
+                    break;
+                case 'radio':
+                    this.activeIndex = 2;
+                    break;
+                case 'rank':
+                    this.activeIndex = 3;
                     break;
                 case 'searchResult':
                     this.searching = false;
@@ -75,7 +102,10 @@ export default {
     },
 
     components: {
-        search
+        search,
+        login,
+        toast,
+        play
     },
 
     methods : {
@@ -89,18 +119,26 @@ export default {
 
 <style scoped>
 .show-search-enter-active,
-.show-search-leave-active {
+.show-search-leave-active,
+.show-login-enter-active,
+.show-login-leave-active {
     transition: all .3s ease;
 }
 .show-search-enter {
-    transform: translateY(50px);
+    transform: translateY(100%);
+}
+.show-login-enter {
+    transform: translateX(100%);
 }
 /* 2.1.8以上只能用leave-to */
 .show-search-leave-to {
-    transform: translateY(600px);
+    transform: translateY(100%);
+}
+.show-login-leave-to {
+    transform: translateX(100%);
 }
 .fade-enter-active {
-    transition: all .4s ease;
+    transition: all .3s ease;
 }
 .fade-enter {
     opacity: 0;
@@ -136,15 +174,16 @@ export default {
     top: 4.5rem;
     width: 100%;
     height: 3rem;
+    padding: 0 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #fff;
 }
 .nav-box .nav-item {
-    width: 25%;
     line-height: 3rem;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    padding: 0 .5rem;
     text-align: center;
     color: #333;
     border-bottom: 1px solid #fff;

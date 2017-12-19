@@ -24,6 +24,18 @@ export default new Router({
         },
 
         {
+            path: '/radio',
+            name: 'radio',
+            component: resolve => require(['../pages/radio.vue'], resolve)
+        },
+
+        {
+            path: '/rank',
+            name: 'rank',
+            component: resolve => require(['../pages/rank.vue'], resolve)
+        },
+
+        {
             path: '/songListDetails',
             name: 'songListDetails',
             component: resolve => require(['../pages/songListDetails.vue'], resolve)
@@ -36,15 +48,21 @@ export default new Router({
         },
 
         {
-            path: '/play',
-            name: 'play',
-            component: resolve => require(['../pages/play.vue'], resolve)
-        },
-
-        {
             path: '/class',
             name: 'class',
             component: resolve => require(['../pages/class.vue'], resolve)
+        },
+
+        {
+            path: '/mvPlay',
+            name: 'mvPlay',
+            component: resolve => require(['../pages/mvPlay.vue'], resolve)
+        },
+
+        {
+            path: '/dailySongs',
+            name: 'dailySongs',
+            component: resolve => require(['../pages/dailySongs.vue'], resolve)
         }
     ]
 });
